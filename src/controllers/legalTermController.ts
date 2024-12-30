@@ -91,5 +91,55 @@ export const legalTermController = {
     } catch (error) {
       res.status(500).json({ error: 'Error fetching term' });
     }
+  },
+
+  // Add a new term
+  async addTerm(req: Request, res: Response) {
+    try {
+      const newTerm = new LegalTerm(req.body);
+      await newTerm.validate(); // Validates the data against the schema
+      await newTerm.save();
+      res.status(201).json(newTerm);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Error adding term' });
+      }
+    }
+  },
+
+  // Add bulk import functionality
+  async bulkImport(req: Request, res: Response) {
+    try {
+      // Validate that request body is an array
+      if (!Array.isArray(req.body)) {
+        return res.status(400).json({ error: 'Request body must be an array of terms' });
+      }
+
+      // Validate each term in the array
+      const terms = req.body.map(term => new LegalTerm(term));
+      
+      // Validate all terms before saving
+      await Promise.all(terms.map(term => term.validate()));
+      
+      // Insert all terms
+      const result = await LegalTerm.insertMany(terms, { ordered: false });
+      
+      res.status(201).json({
+        message: 'Bulk import successful',
+        count: result.length,
+        terms: result
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ 
+          error: 'Bulk import failed', 
+          details: error.message 
+        });
+      } else {
+        res.status(500).json({ error: 'Error during bulk import' });
+      }
+    }
   }
 }; 

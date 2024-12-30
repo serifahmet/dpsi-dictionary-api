@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 export const config = {
   port: process.env.PORT || 3000,
-  mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/legal-dictionary',
+  mongoUri: process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/legal-dictionary',
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
   redisPassword: process.env.REDIS_PASSWORD,
   jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
